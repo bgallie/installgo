@@ -1,0 +1,2 @@
+# installgo
+ Install Linux Go
