@@ -4,10 +4,15 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/spf13/cobra"
@@ -55,6 +60,33 @@ func init() {
 	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+func isCacheValid(cacheFile string) bool {
+	fCache, err := os.Open(cacheFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fCache.Close()
+	cacheInfo, err := fCache.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
+}
+
+func unCache(URL string) {
+	sum := sha1.Sum([]byte(URL))
+	hash := hex.EncodeToString(sum[:])
+	dir := path.Join(cacheDir, hash[:2])
+	filename := path.Join(dir, hash)
+	if isCacheValid(filename) {
+		return
+	}
+	log.Println("Deleting cached file:", filename)
+	if err := os.Remove(filename); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func getCurrentVersion() {
 	out, err := exec.Command("go", "version").Output()
 	if err != nil {
@@ -67,6 +99,7 @@ func getCurrentVersion() {
 }
 
 func scrapeLatestVersion() {
+	unCache("https://go.dev/dl/")
 	c := colly.NewCollector(
 		colly.CacheDir(cacheDir),
 		colly.AllowURLRevisit(),

@@ -15,9 +15,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	defaultGroup string = "general"
+)
+
 var (
 	cfgFile       string
 	cacheDir      string
+	maxCacheTime  float64
 	installDir    string
 	osCpuType     string
 	installDirArg string
@@ -126,6 +131,7 @@ func initConfig() {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			viper.SetDefault("general.confPath", confPath)
 			viper.SetDefault("general.cacheDir", cacheDir)
+			viper.SetDefault("general.maxCacheTime", "6.0")
 			viper.SetDefault("general.installDir", "/usr/local")
 			cobra.CheckErr(viper.SafeWriteConfig())
 			cobra.CheckErr(viper.ReadInConfig())
@@ -137,6 +143,11 @@ func initConfig() {
 	if len(installDirArg) > 0 {
 		installDir = installDirArg
 	} else {
-		installDir = viper.GetString("general.installDir")
+		installDir = viper.GetString(fmt.Sprintf("%s.installDir", defaultGroup))
+	}
+	if viper.IsSet(fmt.Sprintf("%s.maxCacheTime", defaultGroup)) {
+		maxCacheTime = viper.GetFloat64(fmt.Sprintf("%s.maxCacheTime", defaultGroup))
+	} else {
+		maxCacheTime = 1.0
 	}
 }
