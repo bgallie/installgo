@@ -1,10 +1,10 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Billy G. Allie <bill.allie@defiant.mug.org>
 */
 package cmd
 
 import (
-	"crypto/sha256"
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -33,8 +33,30 @@ to quickly create a Cobra application.`,
 			scrapeLatestVersion()
 		}
 		if curVersion == newVersion {
-			fmt.Printf("The latest version (%s) is already installed.\n", curVersion)
-			return
+			if reinstall {
+				fmt.Printf("Re-installing the current version (%s).\n", curVersion)
+			} else {
+				fmt.Printf("The latest version (%s) is already installed.\n", curVersion)
+				return
+			}
+		}
+
+		if !autoupdate {
+			fmt.Print("Do you want to ")
+			if reinstall {
+				fmt.Print("re-")
+			}
+			fmt.Printf("install version %s [yN]? ", newVersion)
+			inLine, err := bufio.NewReader(os.Stdin).ReadString('\n')
+			if err != nil {
+				if err != io.EOF {
+					panic(err)
+				}
+				return
+			}
+			if strings.TrimLeft(strings.ToLower(inLine), " \t")[0] != 'y' {
+				return
+			}
 		}
 		client := grab.NewClient()
 		getFile := fmt.Sprintf("https://go.dev/dl/%s", dlFileName)
@@ -74,30 +96,8 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(updateCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// updateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// updateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-func calculateSHA256(fileName string) string {
-	f, err := os.Open(fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		log.Fatal(err)
-	}
-
-	return fmt.Sprintf("%x", h.Sum(nil))
-
+	updateCmd.Flags().BoolVarP(&reinstall, "reinstall", "r", false, "reinstall the latest version")
+	updateCmd.Flags().Lookup("reinstall").NoOptDefVal = "true"
+	updateCmd.Flags().BoolVarP(&autoupdate, "autoupdate", "a", false, "install the latest version without asking")
+	updateCmd.Flags().Lookup("autoupdate").NoOptDefVal = "true"
 }

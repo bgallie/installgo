@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Billy G. Allie <bill.allie@defiant.mug.org>
 */
 package cmd
 
@@ -26,6 +26,8 @@ var (
 	installDir    string
 	osCpuType     string
 	installDirArg string
+	reinstall     bool
+	autoupdate    bool
 	GitCommit     string = "not set"
 	GitState      string = "not set"
 	GitSummary    string = "not set"
@@ -75,6 +77,7 @@ func init() {
 		if getBuildSettings(bi.Settings, "vcs.modified") == "true" {
 			GitState = "dirty"
 		}
+		osCpuType = fmt.Sprintf("%s-%s", getBuildSettings(bi.Settings, "GOOS"), getBuildSettings(bi.Settings, "GOARCH"))
 	}
 	// Get the build date (as the modified date of the executable) if the build date
 	// is not set.
