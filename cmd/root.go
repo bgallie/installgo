@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	dbug "runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	defaultGroup string = "general"
+	defaultGroup string = "default"
 )
 
 var (
@@ -39,16 +40,11 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "installgo",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "installgo will automate the installation of the latest version of the GO language",
+	Long: `installgo will check https://go.dev for updates for your installed version of go.
+If found you can optionally install the updated version of GO.  You can also
+reinstall the current version if you installed version is the latest one.`,
+	Run: statusCmd.Run,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -123,8 +119,9 @@ func initConfig() {
 		if dirErr == nil {
 			cacheDir = filepath.Join(cacheDir, "installgo_cache")
 		}
-
 	}
+	viper.SetEnvPrefix("igo")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("DEFAULT.", ""))
 	viper.AutomaticEnv()                        // read in environment variables that match
 	cobra.CheckErr(os.MkdirAll(confPath, 0750)) // ensure confPath exists
 	// If a config file is found, read it in.
@@ -132,12 +129,11 @@ func initConfig() {
 		// there was an error reading the config file.  If it did not exist,
 		// the create a default config file with just the engineLayout in it.
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			viper.SetDefault("general.confPath", confPath)
-			viper.SetDefault("general.cacheDir", cacheDir)
-			viper.SetDefault("general.maxCacheTime", "6.0")
-			viper.SetDefault("general.installDir", "/usr/local")
+			viper.SetDefault("confpath", confPath)
+			viper.SetDefault("cachedir", cacheDir)
+			viper.SetDefault("maxcachetime", "6.0")
+			viper.SetDefault("installdir", "/usr/local")
 			cobra.CheckErr(viper.SafeWriteConfig())
-			cobra.CheckErr(viper.ReadInConfig())
 		} else {
 			cobra.CheckErr(err)
 		}

@@ -14,9 +14,24 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/cavaliergopher/grab/v3"
 	"github.com/gocolly/colly"
 )
+
+func isCacheValid(cacheFile string) bool {
+	fCache, err := os.Open(cacheFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fCache.Close()
+	cacheInfo, err := fCache.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
+}
 
 func unCache(URL string) {
 	sum := sha1.Sum([]byte(URL))
@@ -77,6 +92,42 @@ func scrapeLatestVersion() {
 	})
 
 	c.Visit("https://go.dev/dl/")
+}
+
+func updateGo() {
+	client := grab.NewClient()
+	getFile := fmt.Sprintf("https://go.dev/dl/%s", dlFileName)
+	client.UserAgent = "Mozilla/5.0"
+	req, err := grab.NewRequest(os.TempDir(), getFile)
+	if err != nil {
+		panic(err)
+	}
+
+	resp := client.Do(req)
+	if err := resp.Err(); err != nil {
+		panic(err)
+	}
+
+	defer os.Remove(resp.Filename)
+	sha256Chksum := calculateSHA256(resp.Filename)
+	if dlFileCheckSum != sha256Chksum {
+		log.Fatalf("File validation failed!\nOriginal checksum.: %s\nCalculate checksum: %s\n", dlFileCheckSum, sha256Chksum)
+	}
+	fmt.Printf("File validation successful.\nRemoving go version %s\n", curVersion)
+	cmdToRun := fmt.Sprintf("rm -rf %s/go", installDir)
+	cmdErr := exec.Command("sudo", strings.Split(cmdToRun, " ")...).Run()
+	if cmdErr != nil {
+		log.Fatal(cmdErr)
+	}
+	fmt.Printf("Installing version %s\n", newVersion)
+	cmdToRun = fmt.Sprintf("tar -C %s -xf %s", installDir, resp.Filename)
+	cmdErr = exec.Command("sudo", strings.Split(cmdToRun, " ")...).Run()
+	if cmdErr != nil {
+		log.Fatal(cmdErr)
+	}
+	getCurrentVersion()
+	fmt.Printf("Installed version is now %s\n", curVersion)
+	fmt.Println("Done")
 }
 
 func calculateSHA256(fileName string) string {
