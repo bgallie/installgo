@@ -13,12 +13,23 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	dbug "runtime/debug"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
 	"github.com/gocolly/colly"
+	"github.com/spf13/viper"
 )
+
+type parameters struct {
+	CurVersion string
+	NewVersion string
+	TempDir    string
+	InstallDir string
+	DlFileName string
+}
 
 func isCacheValid(cacheFile string) bool {
 	fCache, err := os.Open(cacheFile)
@@ -51,15 +62,24 @@ func getCurrentVersion() {
 	out, err := exec.Command("go", "version").Output()
 	if err != nil {
 		log.Println(err)
+		curVersion = "Go is not installed."
+		bi, ok := dbug.ReadBuildInfo()
+		if ok {
+			osCpuType = fmt.Sprintf("%s-%s", getBuildSettings(bi.Settings, "GOOS"), getBuildSettings(bi.Settings, "GOARCH"))
+		}
+	} else {
+		ver := strings.Split(string(out), " ")
+		curVersion = strings.TrimPrefix(ver[2], "go")
+		osCpuType = strings.TrimSuffix(ver[3], "\n")
+		osCpuType = strings.ReplaceAll(osCpuType, "/", "-")
 	}
-	ver := strings.Split(string(out), " ")
-	curVersion = strings.TrimPrefix(ver[2], "go")
-	osCpuType = strings.TrimSuffix(ver[3], "\n")
-	osCpuType = strings.ReplaceAll(osCpuType, "/", "-")
 }
 
 func scrapeLatestVersion() {
-	unCache("https://go.dev/dl/")
+	_, err := os.Stat(cacheDir)
+	if err == nil {
+		unCache("https://go.dev/dl/")
+	}
 	c := colly.NewCollector(
 		colly.CacheDir(cacheDir),
 		colly.AllowURLRevisit(),
@@ -69,13 +89,19 @@ func scrapeLatestVersion() {
 		log.Println("Something went wrong: ", err)
 	})
 
-	// c2 := c.Clone()
-
-	c.OnHTML("div.toggleVisible", func(e *colly.HTMLElement) {
-		nv, found := strings.CutPrefix(e.Attr("id"), "go")
-		if newVersion == "" && found {
-			newVersion = nv
-			dlFileName = fmt.Sprintf("go%s.%s.tar.gz", newVersion, osCpuType)
+	// Scrape the download file name and vew version number from Go download page
+	c.OnHTML("a.download.downloadBox", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("href"), osCpuType) {
+			name, found := strings.CutPrefix(e.Attr("href"), "/dl/")
+			if !found {
+				log.Fatalln("Something went wrong getting the download file.")
+			}
+			dlFileName = name
+			i := strings.Index(name, osCpuType)
+			if i < 0 {
+				log.Fatalln("Something went wrong getting the new version number.")
+			}
+			newVersion = name[2 : i-1]
 		}
 	})
 
@@ -111,19 +137,46 @@ func updateGo() {
 	defer os.Remove(resp.Filename)
 	sha256Chksum := calculateSHA256(resp.Filename)
 	if dlFileCheckSum != sha256Chksum {
-		log.Fatalf("File validation failed!\nOriginal checksum.: %s\nCalculate checksum: %s\n", dlFileCheckSum, sha256Chksum)
+		log.Fatalf("File validation failed!\n  Original checksum: %s\nCalculated checksum: %s\n", dlFileCheckSum, sha256Chksum)
 	}
-	fmt.Printf("File validation successful.\nRemoving go version %s\n", curVersion)
-	cmdToRun := fmt.Sprintf("rm -rf %s/go", installDir)
-	cmdErr := exec.Command("sudo", strings.Split(cmdToRun, " ")...).Run()
-	if cmdErr != nil {
-		log.Fatal(cmdErr)
-	}
-	fmt.Printf("Installing version %s\n", newVersion)
-	cmdToRun = fmt.Sprintf("tar -C %s -xf %s", installDir, resp.Filename)
-	cmdErr = exec.Command("sudo", strings.Split(cmdToRun, " ")...).Run()
-	if cmdErr != nil {
-		log.Fatal(cmdErr)
+	parms := parameters{curVersion, newVersion, os.TempDir(), installDir, dlFileName}
+	for i := 1; ; i++ {
+		if viper.IsSet(fmt.Sprintf("%s.comment.%d", osCpuType, i)) {
+			comment, err := template.New("comment").Parse(viper.GetString(fmt.Sprintf("%s.comment.%d", osCpuType, i)))
+			if err != nil {
+				log.Fatal(err)
+			}
+			command, err := template.New("command").Parse(viper.GetString(fmt.Sprintf("%s.command.%d", osCpuType, i)))
+			if err != nil {
+				log.Fatal(err)
+			}
+			arguments, err := template.New("comment").Parse(viper.GetString(fmt.Sprintf("%s.args.%d", osCpuType, i)))
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = comment.Execute(os.Stdout, parms)
+			if err != nil {
+				log.Fatal(err)
+			}
+			var cmdToRun strings.Builder
+			err = command.Execute(&cmdToRun, parms)
+			if err != nil {
+				log.Fatal(err)
+			}
+			var argsToUse strings.Builder
+			err = arguments.Execute(&argsToUse, parms)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// fmt.Printf("%s %s\n", cmdToRun.String(), argsToUse.String())
+			cmd := exec.Command(cmdToRun.String(), strings.Split(argsToUse.String(), " ")...)
+			cmdErr := cmd.Run()
+			if cmdErr != nil {
+				log.Fatal(cmdErr)
+			}
+		} else {
+			break
+		}
 	}
 	getCurrentVersion()
 	fmt.Printf("Installed version is now %s\n", curVersion)

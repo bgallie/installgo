@@ -1,12 +1,18 @@
 {
     "cSpell.words": [
+        "autoinstall",
         "autoupdate",
+        "bgallie",
         "cachedir",
         "cavaliergopher",
         "confpath",
         "dbug",
         "dwnld",
         "fsys",
-        "installgo"
+        "gocolly",
+        "installdir",
+        "installgo",
+        "maxcachetime",
+        "parms"
     ]
 }

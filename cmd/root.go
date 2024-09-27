@@ -4,6 +4,8 @@ Copyright © 2024 Billy G. Allie <bill.allie@defiant.mug.org>
 package cmd
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"io/fs"
 	"os"
@@ -16,26 +18,24 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	defaultGroup string = "default"
+var (
+	cfgFile      string
+	cacheDir     string
+	maxCacheTime float64
+	installDir   string
+	osCpuType    string
+	reinstall    bool
+	autoupdate   bool
+	GitCommit    string = "not set"
+	GitState     string = "not set"
+	GitSummary   string = "not set"
+	GitDate      string = "not set"
+	BuildDate    string = "not set"
+	Version      string = ""
 )
 
-var (
-	cfgFile       string
-	cacheDir      string
-	maxCacheTime  float64
-	installDir    string
-	osCpuType     string
-	installDirArg string
-	reinstall     bool
-	autoupdate    bool
-	GitCommit     string = "not set"
-	GitState      string = "not set"
-	GitSummary    string = "not set"
-	GitDate       string = "not set"
-	BuildDate     string = "not set"
-	Version       string = ""
-)
+//go:embed assets/config.ini
+var iniString string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -57,8 +57,9 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "the config file to use")
+	rootCmd.PersistentFlags().StringVarP(&installDir, "installdir", "d", "", "the target directory where Go is installed.")
+	viper.BindPFlag("default.installdir", rootCmd.PersistentFlags().Lookup("installdir"))
 	// Extract version information from the stored build information.
 	bi, ok := dbug.ReadBuildInfo()
 	if ok {
@@ -87,6 +88,7 @@ func init() {
 		cobra.CheckErr(err)
 		BuildDate = fInfo.ModTime().UTC().Format(time.RFC3339)
 	}
+	cobra.OnInitialize(initConfig)
 }
 
 func getBuildSettings(settings []dbug.BuildSetting, key string) string {
@@ -129,24 +131,15 @@ func initConfig() {
 		// there was an error reading the config file.  If it did not exist,
 		// the create a default config file with just the engineLayout in it.
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			viper.ReadConfig(bytes.NewBuffer([]byte(iniString)))
 			viper.SetDefault("confpath", confPath)
 			viper.SetDefault("cachedir", cacheDir)
-			viper.SetDefault("maxcachetime", "6.0")
-			viper.SetDefault("installdir", "/usr/local")
 			cobra.CheckErr(viper.SafeWriteConfig())
 		} else {
 			cobra.CheckErr(err)
 		}
 	}
 	// Use the installDir argument if it exists, else use the config.ini value
-	if len(installDirArg) > 0 {
-		installDir = installDirArg
-	} else {
-		installDir = viper.GetString(fmt.Sprintf("%s.installDir", defaultGroup))
-	}
-	if viper.IsSet(fmt.Sprintf("%s.maxCacheTime", defaultGroup)) {
-		maxCacheTime = viper.GetFloat64(fmt.Sprintf("%s.maxCacheTime", defaultGroup))
-	} else {
-		maxCacheTime = 1.0
-	}
+	installDir = viper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
+	maxCacheTime = viper.GetFloat64("maxcachetime")
 }
