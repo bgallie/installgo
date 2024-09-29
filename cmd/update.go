@@ -23,7 +23,7 @@ install it.  You can also have update reinstall the latest version if it is
 already installed on your system.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		autoupdate = viper.GetBool("default.autoupdate")
-		reinstall = viper.GetBool("reinstall")
+		reinstall = viper.GetBool("default.reinstall")
 		maxCacheTime = viper.GetFloat64("default.maxCacheTime")
 		if curVersion == "" {
 			getCurrentVersion()
