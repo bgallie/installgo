@@ -141,5 +141,4 @@ func initConfig() {
 	}
 	// Use the installDir argument if it exists, else use the config.ini value
 	installDir = viper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
-	maxCacheTime = viper.GetFloat64("maxcachetime")
 }

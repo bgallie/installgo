@@ -45,5 +45,6 @@ func init() {
 	statusCmd.Flags().Lookup("autoupdate").NoOptDefVal = "true"
 	viper.BindPFlag("default.autoupdate", statusCmd.Flags().Lookup("autoupdate"))
 	statusCmd.Flags().Float64VarP(&maxCacheTime, "maxcachetime", "m", 6.0, "time (in hours) that the cache is valid for.")
+	statusCmd.Flags().Lookup("maxcachetime").NoOptDefVal = "0.0"
 	viper.BindPFlag("default.maxcachetime", statusCmd.Flags().Lookup("maxcachetime"))
 }

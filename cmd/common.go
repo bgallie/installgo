@@ -41,7 +41,7 @@ func isCacheValid(cacheFile string) bool {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
+	return maxCacheTime != 0.0 && time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
 }
 
 func unCache(URL string) {
@@ -52,7 +52,7 @@ func unCache(URL string) {
 	if isCacheValid(filename) {
 		return
 	}
-	log.Println("Deleting cached file:", filename)
+	// log.Println("Deleting cached file:", filename)
 	if err := os.Remove(filename); err != nil {
 		log.Fatal(err)
 	}
