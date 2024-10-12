@@ -52,7 +52,7 @@ func unCache(URL string) {
 	if isCacheValid(filename) {
 		return
 	}
-	// log.Println("Deleting cached file:", filename)
+	fmt.Println("Deleting cached file.")
 	if err := os.Remove(filename); err != nil {
 		log.Fatal(err)
 	}
