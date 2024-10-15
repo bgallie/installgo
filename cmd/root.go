@@ -24,6 +24,7 @@ var (
 	maxCacheTime float64
 	installDir   string
 	osCpuType    string
+	extension    string
 	reinstall    bool
 	autoupdate   bool
 	GitCommit    string = "not set"
@@ -141,4 +142,6 @@ func initConfig() {
 	}
 	// Use the installDir argument if it exists, else use the config.ini value
 	installDir = viper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
+	// Get the extension to use if it exists
+	extension = viper.GetString(fmt.Sprintf("%s.extension", osCpuType))
 }

@@ -29,6 +29,7 @@ type parameters struct {
 	TempDir    string
 	InstallDir string
 	DlFileName string
+	Extension  string
 }
 
 func isCacheValid(cacheFile string) bool {
@@ -91,7 +92,7 @@ func scrapeLatestVersion() {
 
 	// Scrape the download file name and vew version number from Go download page
 	c.OnHTML("a.download.downloadBox", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("href"), osCpuType) {
+		if strings.Contains(e.Attr("href"), fmt.Sprintf("%s.%s", osCpuType, extension)) {
 			name, found := strings.CutPrefix(e.Attr("href"), "/dl/")
 			if !found {
 				log.Fatalln("Something went wrong getting the download file.")
@@ -139,7 +140,7 @@ func updateGo() {
 	if dlFileCheckSum != sha256Chksum {
 		log.Fatalf("File validation failed!\n  Original checksum: %s\nCalculated checksum: %s\n", dlFileCheckSum, sha256Chksum)
 	}
-	parms := parameters{curVersion, newVersion, os.TempDir(), installDir, dlFileName}
+	parms := parameters{curVersion, newVersion, os.TempDir(), installDir, dlFileName, extension}
 	for i := 1; ; i++ {
 		if viper.IsSet(fmt.Sprintf("%s.comment.%d", osCpuType, i)) {
 			comment, err := template.New("comment").Parse(viper.GetString(fmt.Sprintf("%s.comment.%d", osCpuType, i)))
