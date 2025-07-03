@@ -20,7 +20,6 @@ import (
 
 	"github.com/cavaliergopher/grab/v3"
 	"github.com/gocolly/colly"
-	"github.com/spf13/viper"
 )
 
 type parameters struct {
@@ -141,21 +140,25 @@ func updateGo() {
 		log.Fatalf("File validation failed!\n  Original checksum: %s\nCalculated checksum: %s\n", dlFileCheckSum, sha256Chksum)
 	}
 	parms := parameters{curVersion, newVersion, os.TempDir(), installDir, dlFileName, extension}
-	for i := 1; ; i++ {
-		if viper.IsSet(fmt.Sprintf("%s.comment.%d", osCpuType, i)) {
-			comment, err := template.New("comment").Parse(viper.GetString(fmt.Sprintf("%s.comment.%d", osCpuType, i)))
-			if err != nil {
-				log.Fatal(err)
-			}
-			command, err := template.New("command").Parse(viper.GetString(fmt.Sprintf("%s.command.%d", osCpuType, i)))
-			if err != nil {
-				log.Fatal(err)
-			}
-			arguments, err := template.New("comment").Parse(viper.GetString(fmt.Sprintf("%s.args.%d", osCpuType, i)))
+	done := false
+	for i := 0; !done; i++ {
+		maybeDone := false
+		if i >= len(comments) {
+			maybeDone = maybeDone || true
+		} else {
+			comment, err := template.New("comment").Parse(comments[i])
 			if err != nil {
 				log.Fatal(err)
 			}
 			err = comment.Execute(os.Stdout, parms)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		if i >= len(commands) {
+			maybeDone = maybeDone || true
+		} else {
+			command, err := template.New("command").Parse(commands[i])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -164,20 +167,19 @@ func updateGo() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			var argsToUse strings.Builder
-			err = arguments.Execute(&argsToUse, parms)
-			if err != nil {
-				log.Fatal(err)
+			cmdAndArgsToRun := strings.Split(cmdToRun.String(), seperator)
+			if len(cmdAndArgsToRun) < 1 {
+				log.Fatal("Command to run is empty.")
 			}
-			// fmt.Printf("%s %s\n", cmdToRun.String(), argsToUse.String())
-			cmd := exec.Command(cmdToRun.String(), strings.Split(argsToUse.String(), " ")...)
+			cmd := exec.Command(cmdAndArgsToRun[0], cmdAndArgsToRun[1:]...)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 			cmdErr := cmd.Run()
 			if cmdErr != nil {
 				log.Fatal(cmdErr)
 			}
-		} else {
-			break
 		}
+		done = !maybeDone
 	}
 	getCurrentVersion()
 	fmt.Printf("Installed version is now %s\n", curVersion)

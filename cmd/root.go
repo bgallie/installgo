@@ -19,12 +19,16 @@ import (
 )
 
 var (
+	igoViper     = viper.New()
 	cfgFile      string
 	cacheDir     string
 	maxCacheTime float64
-	installDir   string
 	osCpuType    string
+	installDir   string
 	extension    string
+	commands     []string
+	comments     []string
+	seperator    string
 	reinstall    bool
 	autoupdate   bool
 	GitCommit    string = "not set"
@@ -35,8 +39,8 @@ var (
 	Version      string = ""
 )
 
-//go:embed assets/config.ini
-var iniString string
+//go:embed assets/config.toml
+var tomlString string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -60,7 +64,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "the config file to use")
 	rootCmd.PersistentFlags().StringVarP(&installDir, "installdir", "d", "", "the target directory where Go is installed.")
-	viper.BindPFlag("default.installdir", rootCmd.PersistentFlags().Lookup("installdir"))
+	igoViper.BindPFlag("default.installdir", rootCmd.PersistentFlags().Lookup("installdir"))
 	// Extract version information from the stored build information.
 	bi, ok := dbug.ReadBuildInfo()
 	if ok {
@@ -106,15 +110,15 @@ func initConfig() {
 	var err error
 	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		igoViper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
 		confPath, err = os.UserConfigDir()
 		cobra.CheckErr(err)
 		confPath = filepath.Join(confPath, "installgo")
-		viper.AddConfigPath(confPath)
-		viper.SetConfigName("config")
-		viper.SetConfigType("ini")
+		igoViper.AddConfigPath(confPath)
+		igoViper.SetConfigName("config")
+		igoViper.SetConfigType("toml") // Set the config file type to toml
 	}
 	var dirErr error
 	if cacheDir == "" {
@@ -123,25 +127,29 @@ func initConfig() {
 			cacheDir = filepath.Join(cacheDir, "installgo_cache")
 		}
 	}
-	viper.SetEnvPrefix("igo")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("DEFAULT.", ""))
-	viper.AutomaticEnv()                        // read in environment variables that match
+	igoViper.SetEnvPrefix("igo")
+	igoViper.SetEnvKeyReplacer(strings.NewReplacer("DEFAULT.", ""))
+	igoViper.AutomaticEnv()                     // read in environment variables that match
 	cobra.CheckErr(os.MkdirAll(confPath, 0750)) // ensure confPath exists
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
+	if err := igoViper.ReadInConfig(); err != nil {
 		// there was an error reading the config file.  If it did not exist,
 		// the create a default config file with just the engineLayout in it.
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			viper.ReadConfig(bytes.NewBuffer([]byte(iniString)))
-			viper.SetDefault("confpath", confPath)
-			viper.SetDefault("cachedir", cacheDir)
-			cobra.CheckErr(viper.SafeWriteConfig())
+			igoViper.ReadConfig(bytes.NewBuffer([]byte(tomlString)))
+			igoViper.SetDefault("confpath", confPath)
+			igoViper.SetDefault("cachedir", cacheDir)
+			cobra.CheckErr(igoViper.SafeWriteConfig())
 		} else {
 			cobra.CheckErr(err)
 		}
 	}
-	// Use the installDir argument if it exists, else use the config.ini value
-	installDir = viper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
-	// Get the extension to use if it exists
-	extension = viper.GetString(fmt.Sprintf("%s.extension", osCpuType))
+	seperator = igoViper.GetString("seperator")
+	installDir = igoViper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
+	extension = igoViper.GetString(fmt.Sprintf("%s.extension", osCpuType))
+	commands = igoViper.GetStringSlice(fmt.Sprintf("%s.command", osCpuType))
+	comments = igoViper.GetStringSlice(fmt.Sprintf("%s.comment", osCpuType))
+	// _ = seperator
+	// _ = commands
+	// _ = comments
 }
