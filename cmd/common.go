@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	dbug "runtime/debug"
 	"strings"
 	"text/template"
 	"time"
@@ -61,17 +60,10 @@ func unCache(URL string) {
 func getCurrentVersion() {
 	out, err := exec.Command("go", "version").Output()
 	if err != nil {
-		log.Println(err)
 		curVersion = "Go is not installed."
-		bi, ok := dbug.ReadBuildInfo()
-		if ok {
-			osCpuType = fmt.Sprintf("%s-%s", getBuildSettings(bi.Settings, "GOOS"), getBuildSettings(bi.Settings, "GOARCH"))
-		}
 	} else {
 		ver := strings.Split(string(out), " ")
 		curVersion = strings.TrimPrefix(ver[2], "go")
-		osCpuType = strings.TrimSuffix(ver[3], "\n")
-		osCpuType = strings.ReplaceAll(osCpuType, "/", "-")
 	}
 }
 

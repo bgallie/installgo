@@ -1,12 +1,17 @@
 # installgo
-***installgo*** will check https://go.dev if updates are available for your installed version of go.  If found you can optionally install the updated version of GO.  You can also reinstall the current version if you installed version is the latest one.
-## Usage:
-```
+
+***installgo*** will check <https://go.dev> if updates are available for your installed version of go.  If found you can optionally install the updated version of GO.  You can also reinstall the current version if you installed version is the latest one.
+
+## Usage
+
+```text
   installgo [flags]
   installgo [command]
 ```
-## Available Commands:
-```
+
+## Available Commands
+
+```text
   completion  Generate the autocompletion script for the specified shell
   get         get the value associated with the given keys from the config file.
   help        Help about any command
@@ -14,119 +19,170 @@
   update      update will install the latest version of GO if not already installed.
   version     Display version information
 ```
-## Flags:
-```
+
+## Flags
+
+```text
       --config string       the config file to use
   -h, --help                help for installgo
   -d, --installdir string   the target directory where Go is installed.
   -v, --version             version for installgo
 ```
+
 Use `installgo [command] --help` for more information about a command.
+
 # completion
+
 Generate the autocompletion script for installgo for the specified shell.
 See each sub-command's help for details on how to use the generated script.
 
-## Usage:
-```
+## Usage
+
+```text
   installgo completion [command]
 ```
-## Available Commands:
-```
+
+## Available Commands
+
+```text
   bash        Generate the autocompletion script for bash
   fish        Generate the autocompletion script for fish
   powershell  Generate the autocompletion script for powershell
   zsh         Generate the autocompletion script for zsh
 ```
-## Flags:
+
+## Flags
+
+```text
+  -h, --help   help for completion 
 ```
-  -h, --help   help for completion
-```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
+
 Use `installgo completion [command] --help` for more information about a command.
+
 # get
+
 ***get*** the values associated with the given keys from the config file.  If no
 keys are given, display all the key/value pairs in the config file.
 
-## Usage:
-```
+## Usage
+
+```text
   installgo get [flags]
 ```
-## Flags:
-```
+
+## Flags
+
+```text
   -h, --help   help for get
 ```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
+
 # help  
+
 ***help*** provides help for any command in the application.  Simply type `installgo help [path to command]` for full details.
 
-## Usage:
-```
+## Usage
+
+```text
   installgo help [command] [flags]
 ```
-## Flags:
-```
+
+## Flags
+
+```text
   -h, --help   help for help
 ```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
+
 # status
-***status*** will check https://go.dev for the latest version of GO and optionally install it if the `--autoinstall` option is given.
-## Usage:
-```
+
+***status*** will check <https://go.dev> for the latest version of GO and optionally install it if the `--autoinstall` option is given.
+
+## Usage
+
+```text
   installgo status [flags]
 ```
-## Flags:
-```
+
+## Flags
+
+```text
   -a, --autoupdate                 install the latest version automatically.
   -h, --help                       help for status
   -m, --maxcachetime float[=0.0]   time (in hours) that the cache is valid for. (default 6)
 ```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
+
 # update  
-***update*** will check https://go.dev for the latest version of GO and optionally install it.  You can also have update reinstall the latest version if it is already installed on your system.
-## Usage:
-```
+
+***update*** will check <https://go.dev> for the latest version of GO and optionally install it.  You can also have update reinstall the latest version if it is already installed on your system.
+
+## Usage
+
+```text
   installgo update [flags]
 ```
-## Flags:
-```
+
+## Flags
+
+```text
   -a, --autoupdate           install the latest version without asking.
   -h, --help                 help for update
   -m, --maxcachetime float   time (in hours) that the cache is valid for. (default 6)
   -r, --reinstall            reinstall the latest version if already installed.
 ```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
-# version 
+
+# version
+
 Display version and detailed build information for installgo.
-## Usage:
-```
+
+## Usage
+
+```text
   installgo version [flags]
 ```
-## Flags:
-```
+
+## Flags
+
+```text
   -h, --help   help for version
 ```
-## Global Flags:
-```
+
+## Global Flags
+
+```text
       --config string       the config file to use
   -d, --installdir string   the target directory where Go is installed.
 ```
