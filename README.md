@@ -66,21 +66,20 @@ See each sub-command's help for details on how to use the generated script.
 
 Use `installgo completion [command] --help` for more information about a command.
 
-# get
+# eidt
 
-***get*** the values associated with the given keys from the config file.  If no
-keys are given, display all the key/value pairs in the config file.
+***edit*** starts an editor to edit the `installgo` configuration file.
 
 ## Usage
 
 ```text
-  installgo get [flags]
+  installgo list [flags]
 ```
 
 ## Flags
 
 ```text
-  -h, --help   help for get
+  -h, --help   help for list
 ```
 
 ## Global Flags
@@ -104,6 +103,29 @@ keys are given, display all the key/value pairs in the config file.
 
 ```text
   -h, --help   help for help
+```
+
+## Global Flags
+
+```text
+      --config string       the config file to use
+  -d, --installdir string   the target directory where Go is installed.
+```
+
+# list
+
+***list*** the contents of the config file.
+
+## Usage
+
+```text
+  installgo list [flags]
+```
+
+## Flags
+
+```text
+  -h, --help   help for list
 ```
 
 ## Global Flags

@@ -1,4 +1,22 @@
-seperator = '^&^'
+separator = '^&^'
+maxCacheTime = '6h'
+autoupdate = true
+
+[editor.linux-amd64]
+command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'
+editor = 'nano'
+
+[editor.linux-arm64]
+command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'
+editor = 'nano'
+
+[editor.windows-386]
+command = '{{.Editor}}^&^{{.ConfigFile}}'
+editor = 'notepad.exe'
+
+[editor.windows-amd64]
+command = '{{.Editor}}^&^{{.ConfigFile}}'
+editor = 'notepad.exe'
 
 [darwin-amd64]
 command = [ 'sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}' ]

@@ -137,9 +137,10 @@ func initConfig() {
 		// the create a default config file with just the engineLayout in it.
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			igoViper.ReadConfig(bytes.NewBuffer([]byte(tomlString)))
-			igoViper.SetDefault("confpath", confPath)
-			igoViper.SetDefault("cachedir", cacheDir)
 			cobra.CheckErr(igoViper.SafeWriteConfig())
+			if err := igoViper.ReadInConfig(); err != nil {
+				cobra.CheckErr(fmt.Errorf("fatal error reading config file: %s", err))
+			}
 		} else {
 			cobra.CheckErr(err)
 		}
