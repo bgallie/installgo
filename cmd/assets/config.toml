@@ -1,4 +1,4 @@
-separator = '^&^'
+seperator = '^&^'
 maxCacheTime = '6h'
 autoupdate = true
 
