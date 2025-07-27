@@ -28,7 +28,7 @@ var (
 	extension    string
 	commands     []string
 	comments     []string
-	seperator    string
+	separator    string
 	reinstall    bool
 	autoupdate   bool
 	GitCommit    string = "not set"
@@ -145,7 +145,7 @@ func initConfig() {
 			cobra.CheckErr(err)
 		}
 	}
-	seperator = igoViper.GetString("seperator")
+	separator = igoViper.GetString("separator")
 	installDir = igoViper.GetString(fmt.Sprintf("%s.installdir", osCpuType))
 	extension = igoViper.GetString(fmt.Sprintf("%s.extension", osCpuType))
 	commands = igoViper.GetStringSlice(fmt.Sprintf("%s.command", osCpuType))

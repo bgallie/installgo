@@ -1,5 +1,5 @@
-seperator = '^&^'
-maxCacheTime = '6h'
+separator = '^&^'
+maxCacheTime = '2.0'
 autoupdate = true
 
 [editor.linux-amd64]

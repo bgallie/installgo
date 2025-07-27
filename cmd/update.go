@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // updateCmd represents the update command
@@ -22,9 +21,15 @@ var updateCmd = &cobra.Command{
 install it.  You can also have update reinstall the latest version if it is
 already installed on your system.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		autoupdate = viper.GetBool("default.autoupdate")
-		reinstall = viper.GetBool("default.reinstall")
-		maxCacheTime = viper.GetFloat64("default.maxCacheTime")
+		if !cmd.Flags().Lookup("autoupdate").Changed {
+			autoupdate = igoViper.GetBool("autoupdate")
+		}
+		if !cmd.Flags().Lookup("reinstall").Changed {
+			reinstall = igoViper.GetBool("reinstall")
+		}
+		if !cmd.Flags().Lookup("maxcachetime").Changed {
+			maxCacheTime = igoViper.GetFloat64("maxcachetime")
+		}
 		if curVersion == "" {
 			getCurrentVersion()
 			scrapeLatestVersion()
@@ -65,11 +70,11 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().BoolVarP(&reinstall, "reinstall", "r", false, "reinstall the latest version if already installed.")
 	updateCmd.Flags().Lookup("reinstall").NoOptDefVal = "true"
-	viper.BindPFlag("default.reinstall", updateCmd.Flags().Lookup("reinstall"))
+	igoViper.BindPFlag("reinstall", updateCmd.Flags().Lookup("reinstall"))
 	updateCmd.Flags().BoolVarP(&autoupdate, "autoupdate", "a", false, "install the latest version without asking.")
 	updateCmd.Flags().Lookup("autoupdate").NoOptDefVal = "true"
-	viper.BindPFlag("default.autoupdate", updateCmd.Flags().Lookup("autoupdate"))
-	updateCmd.Flags().Float64VarP(&maxCacheTime, "maxcachetime", "m", 6.0, "time (in hours) that the cache is valid for.")
+	igoViper.BindPFlag("autoupdate", updateCmd.Flags().Lookup("autoupdate"))
+	updateCmd.Flags().Float64VarP(&maxCacheTime, "maxcachetime", "m", 0.0, "time (in hours) that the cache is valid for.")
 	statusCmd.Flags().Lookup("maxcachetime").NoOptDefVal = "0.0"
-	viper.BindPFlag("default.maxcachetime", updateCmd.Flags().Lookup("maxcachetime"))
+	igoViper.BindPFlag("maxCacheTime", updateCmd.Flags().Lookup("maxcachetime"))
 }

@@ -159,7 +159,7 @@ func updateGo() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			cmdAndArgsToRun := strings.Split(cmdToRun.String(), seperator)
+			cmdAndArgsToRun := strings.Split(cmdToRun.String(), separator)
 			if len(cmdAndArgsToRun) < 1 {
 				log.Fatal("Command to run is empty.")
 			}
@@ -168,6 +168,10 @@ func updateGo() {
 			cmd.Stderr = os.Stderr
 			cmdErr := cmd.Run()
 			if cmdErr != nil {
+				if cmd.ProcessState.ExitCode() == 1602 {
+					fmt.Println("Installation cancelled by user.")
+					break
+				}
 				log.Fatal(cmdErr)
 			}
 		}

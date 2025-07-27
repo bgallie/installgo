@@ -24,9 +24,12 @@ var statusCmd = &cobra.Command{
 	Long: `status will check https://go.dev for the latest version of GO and optionally
 install it if the --autoinstall option is given.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Println("status called")
-		autoupdate = viper.GetBool("default.autoupdate")
-		maxCacheTime = viper.GetFloat64("default.maxcachetime")
+		if !cmd.Flags().Lookup("autoupdate").Changed {
+			autoupdate = igoViper.GetBool("autoupdate")
+		}
+		if !cmd.Flags().Lookup("maxcachetime").Changed {
+			maxCacheTime = igoViper.GetFloat64("maxcachetime")
+		}
 		getCurrentVersion()
 		fmt.Printf("Current Version: %s\n", curVersion)
 		scrapeLatestVersion()
@@ -43,8 +46,8 @@ func init() {
 	rootCmd.AddCommand(statusCmd)
 	statusCmd.Flags().BoolVarP(&autoupdate, "autoupdate", "a", false, "install the latest version automatically.")
 	statusCmd.Flags().Lookup("autoupdate").NoOptDefVal = "true"
-	viper.BindPFlag("default.autoupdate", statusCmd.Flags().Lookup("autoupdate"))
+	viper.BindPFlag("autoupdate", statusCmd.Flags().Lookup("autoupdate"))
 	statusCmd.Flags().Float64VarP(&maxCacheTime, "maxcachetime", "m", 6.0, "time (in hours) that the cache is valid for.")
 	statusCmd.Flags().Lookup("maxcachetime").NoOptDefVal = "0.0"
-	viper.BindPFlag("default.maxcachetime", statusCmd.Flags().Lookup("maxcachetime"))
+	viper.BindPFlag("maxcachetime", statusCmd.Flags().Lookup("maxcachetime"))
 }
