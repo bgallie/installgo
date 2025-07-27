@@ -66,7 +66,7 @@ See each sub-command's help for details on how to use the generated script.
 
 Use `installgo completion [command] --help` for more information about a command.
 
-# eidt
+# edit
 
 ***edit*** starts an editor to edit the `installgo` configuration file.
 
