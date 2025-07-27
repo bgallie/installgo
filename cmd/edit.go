@@ -62,5 +62,5 @@ func getCommandArgs() []string {
 		log.Fatal(err)
 	}
 
-	return strings.Split(b.String(), igoViper.GetString("separator"))
+	return strings.Split(b.String(), igoViper.GetString("seperator"))
 }
