@@ -49,7 +49,6 @@ var rootCmd = &cobra.Command{
 	Long: `installgo will check https://go.dev for updates for your installed version of go.
 If found you can optionally install the updated version of GO.  You can also
 reinstall the current version if you installed version is the latest one.`,
-	Run: statusCmd.Run,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -150,7 +149,4 @@ func initConfig() {
 	extension = igoViper.GetString(fmt.Sprintf("%s.extension", osCpuType))
 	commands = igoViper.GetStringSlice(fmt.Sprintf("%s.command", osCpuType))
 	comments = igoViper.GetStringSlice(fmt.Sprintf("%s.comment", osCpuType))
-	// _ = seperator
-	// _ = commands
-	// _ = comments
 }
