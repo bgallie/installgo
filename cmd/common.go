@@ -33,13 +33,19 @@ type parameters struct {
 func isCacheValid(cacheFile string) bool {
 	fCache, err := os.Open(cacheFile)
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		return false
 	}
 	defer fCache.Close()
+	// Check if cache file is empty
 	cacheInfo, err := fCache.Stat()
 	if err != nil {
 		log.Fatal(err)
 	}
+	if cacheInfo.Size() == 0 {
+		return false
+	}
+	// Check if cache is still valid
 	return maxCacheTime != 0.0 && time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
 }
 

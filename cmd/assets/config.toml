@@ -1,6 +1,6 @@
 separator = '^&^'
 maxCacheTime = '2.0'
-autoupdate = true
+autoupdate = false
 
 [editor.linux-amd64]
 command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'

@@ -95,6 +95,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
+// getBuildSettings extracts the value for a given key from the build settings.
 func getBuildSettings(settings []dbug.BuildSetting, key string) string {
 	for _, v := range settings {
 		if v.Key == key {
@@ -104,6 +105,28 @@ func getBuildSettings(settings []dbug.BuildSetting, key string) string {
 	return ""
 }
 
+// checkForConfigIni checks for an old config.ini file in the config directory.
+// If found, it renames it to config.ini.old and prompts the user to edit the
+// new config.toml file to update any settings.
+func checkForConfigIni(confPath string) {
+	_, err := os.Stat(filepath.Join(confPath, "config.ini"))
+	if err == nil {
+		//           1         2         3         4         5         6         7         8
+		fmt.Println("**********************************************************************")
+		fmt.Printf("A config.ini file was found in %s.\n", confPath)
+		fmt.Println("This file is no longer used.  It will be renamed to config.ini.old and")
+		fmt.Println("a new config.toml file will be created.  If you previously changed ")
+		fmt.Println("settings in the config.ini file, you will need to edit [installgo edit]")
+		fmt.Println("the config.toml file to update any settings.")
+		fmt.Println("**********************************************************************")
+		fmt.Print("Press Enter to continue...")
+		fmt.Scanln()
+		err = os.Rename(filepath.Join(confPath, "config.ini"), filepath.Join(confPath, "config.ini.old"))
+		cobra.CheckErr(err)
+	}
+}
+
+// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var confPath string
 	var err error
@@ -115,6 +138,7 @@ func initConfig() {
 		confPath, err = os.UserConfigDir()
 		cobra.CheckErr(err)
 		confPath = filepath.Join(confPath, "installgo")
+		checkForConfigIni(confPath)
 		igoViper.AddConfigPath(confPath)
 		igoViper.SetConfigName("config")
 		igoViper.SetConfigType("toml") // Set the config file type to toml
@@ -133,7 +157,7 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := igoViper.ReadInConfig(); err != nil {
 		// there was an error reading the config file.  If it did not exist,
-		// the create a default config file with just the engineLayout in it.
+		// the create it from the embedded default config file.
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			igoViper.ReadConfig(bytes.NewBuffer([]byte(tomlString)))
 			cobra.CheckErr(igoViper.SafeWriteConfig())
