@@ -30,23 +30,24 @@ type parameters struct {
 	Extension  string
 }
 
+var cacheErrorOccurred bool = false
+
 func isCacheValid(cacheFile string) bool {
 	fCache, err := os.Open(cacheFile)
 	if err != nil {
-		// log.Fatal(err)
 		return false
 	}
 	defer fCache.Close()
 	// Check if cache file is empty
 	cacheInfo, err := fCache.Stat()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if cacheInfo.Size() == 0 {
+	if err != nil || cacheInfo == nil || cacheInfo.Size() == 0 {
 		return false
 	}
 	// Check if cache is still valid
-	return maxCacheTime != 0.0 && time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
+	if maxCacheTime == 0.0 {
+		return false
+	}
+	return time.Since(cacheInfo.ModTime()).Hours() <= maxCacheTime
 }
 
 func unCache(URL string) {
@@ -54,12 +55,15 @@ func unCache(URL string) {
 	hash := hex.EncodeToString(sum[:])
 	dir := path.Join(cacheDir, hash[:2])
 	filename := path.Join(dir, hash)
-	if isCacheValid(filename) {
+	if isCacheValid(filename) && !cacheErrorOccurred {
 		return
 	}
-	fmt.Println("Deleting cached file.")
+	cacheErrorOccurred = false
+	// fmt.Println("Deleting cached file.")
 	if err := os.Remove(filename); err != nil {
-		log.Fatal(err)
+		if !os.IsNotExist(err) {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -73,7 +77,7 @@ func getCurrentVersion() {
 	}
 }
 
-func scrapeLatestVersion() {
+func scrapeLatestVersion() error {
 	_, err := os.Stat(cacheDir)
 	if err == nil {
 		unCache("https://go.dev/dl/")
@@ -84,6 +88,11 @@ func scrapeLatestVersion() {
 	)
 
 	c.OnError(func(_ *colly.Response, err error) {
+		if strings.HasPrefix(err.Error(), "gob:") {
+			// This error happens when the cache file is corrupted.
+			cacheErrorOccurred = true
+			return
+		}
 		log.Println("Something went wrong: ", err)
 	})
 
@@ -116,6 +125,13 @@ func scrapeLatestVersion() {
 	})
 
 	c.Visit("https://go.dev/dl/")
+
+	if cacheErrorOccurred {
+		unCache("https://go.dev/dl/")
+		return fmt.Errorf("cache file is corrupted")
+	}
+
+	return nil
 }
 
 func updateGo() {

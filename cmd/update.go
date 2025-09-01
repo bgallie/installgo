@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -32,7 +33,11 @@ already installed on your system.`,
 		}
 		if curVersion == "" {
 			getCurrentVersion()
-			scrapeLatestVersion()
+			if err := scrapeLatestVersion(); err != nil {
+				if err = scrapeLatestVersion(); err != nil {
+					log.Fatal("Something went terribly wrong checking for the latest version:", err)
+				}
+			}
 		}
 		if curVersion == newVersion {
 			if reinstall {

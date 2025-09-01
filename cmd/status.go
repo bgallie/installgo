@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,7 +33,11 @@ install it if the --autoinstall option is given.`,
 		}
 		getCurrentVersion()
 		fmt.Printf("Current Version: %s\n", curVersion)
-		scrapeLatestVersion()
+		if err := scrapeLatestVersion(); err != nil {
+			if err = scrapeLatestVersion(); err != nil {
+				log.Fatal("Something went terribly wrong checking for the latest version:", err)
+			}
+		}
 		if curVersion != newVersion {
 			fmt.Printf("A new version, %s, is available.\n", newVersion)
 			if autoupdate {
