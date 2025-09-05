@@ -1,7 +1,30 @@
-separator = '^&^'
-maxCacheTime = '2.0'
 autoupdate = false
+maxcachetime = '2.0'
+reinstall = false
+separator = '^&^'
 
+[darwin-amd64]
+command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
+extension = 'pkg'
+installdir = '/'
+
+[darwin-arm64]
+command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
+extension = 'pkg'
+installdir = '/'
+
+[darwin-armv6l]
+command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
+extension = 'pkg'
+installdir = '/'
+
+[default]
+installdir = ''
+
+[editor]
 [editor.linux-amd64]
 command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'
 editor = 'nano'
@@ -18,44 +41,26 @@ editor = 'notepad.exe'
 command = '{{.Editor}}^&^{{.ConfigFile}}'
 editor = 'notepad.exe'
 
-[darwin-amd64]
-command = [ 'sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}' ]
-comment = [ 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
-extension = 'pkg'
-installdir = '/'
-
-[darwin-arm64]
-command = [ 'sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}' ]
-comment = [ 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
-extension = 'pkg'
-installdir = '/'
-
-[darwin-armv6l]
-command = [ 'sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}' ]
-comment = [ 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
-extension = 'pkg'
-installdir = '/'
-
 [linux-amd64]
-command = [ 'sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xvf^&^{{.TempDir}}/{{.DlFileName}}' ]
-comment = [ 'Removing Go version {{printf "%s\n" .CurVersion}}', 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
+command = ['sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xf^&^{{.TempDir}}/{{.DlFileName}}']
+comment = ['Removing Go version {{printf "%s ... " .CurVersion}}', 'Installing Go version {{printf "%s ... " .NewVersion}}']
 extension = 'tar.gz'
 installdir = '/usr/local'
 
 [linux-arm64]
-command = [ 'sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xvf^&^{{.TempDir}}/{{.DlFileName}}' ]
-comment = [ 'Removing Go version {{printf "%s\n" .CurVersion}}', 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
+command = ['sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xvf^&^{{.TempDir}}/{{.DlFileName}}']
+comment = ['Removing Go version {{printf "%s\n" .CurVersion}}', 'Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'tar.gz'
 installdir = '/usr/local'
 
 [windows-386]
-command = [ 'msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}' ]
-comment = [ 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
+command = ['msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}']
+comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'msi'
 installdir = 'C:\Program Files (x86)\Go'
 
 [windows-amd64]
-command = [ 'msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}' ]
-comment = [ 'Installing Go version {{printf "%s\n" .NewVersion}}' ]
+command = ['msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}']
+comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'msi'
 installdir = 'C:\Program Files\Go'

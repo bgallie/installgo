@@ -154,12 +154,8 @@ func updateGo() {
 		log.Fatalf("File validation failed!\n  Original checksum: %s\nCalculated checksum: %s\n", dlFileCheckSum, sha256Chksum)
 	}
 	parms := parameters{curVersion, newVersion, os.TempDir(), installDir, dlFileName, extension}
-	done := false
-	for i := 0; !done; i++ {
-		maybeDone := false
-		if i >= len(comments) {
-			maybeDone = maybeDone || true
-		} else {
+	for i := 0; i < len(comments) || i < len(commands); i++ {
+		if i < len(comments) && comments[i] != "" {
 			comment, err := template.New("comment").Parse(comments[i])
 			if err != nil {
 				log.Fatal(err)
@@ -169,9 +165,7 @@ func updateGo() {
 				log.Fatal(err)
 			}
 		}
-		if i >= len(commands) {
-			maybeDone = maybeDone || true
-		} else {
+		if i < len(commands) && commands[i] != "" {
 			command, err := template.New("command").Parse(commands[i])
 			if err != nil {
 				log.Fatal(err)
@@ -183,8 +177,9 @@ func updateGo() {
 			}
 			cmdAndArgsToRun := strings.Split(cmdToRun.String(), separator)
 			if len(cmdAndArgsToRun) < 1 {
-				log.Fatal("Command to run is empty.")
+				continue // nothing to run, so skip it
 			}
+			fmt.Println("Done.")
 			cmd := exec.Command(cmdAndArgsToRun[0], cmdAndArgsToRun[1:]...)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
@@ -197,11 +192,9 @@ func updateGo() {
 				log.Fatal(cmdErr)
 			}
 		}
-		done = !maybeDone
 	}
 	getCurrentVersion()
 	fmt.Printf("Installed version is now %s\n", curVersion)
-	fmt.Println("Done")
 }
 
 func calculateSHA256(fileName string) string {

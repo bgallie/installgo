@@ -16,13 +16,17 @@ var versionCmd = &cobra.Command{
 	Long:  `Display version and detailed build information for installgo.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if Version == "" {
-			Version = "(devel)"
+			Version = "(development)"
 		}
 		fmt.Println("    Version:", Version)
-		if len(GitDate) > 1 {
+		if GitDate != "" {
 			fmt.Println("Commit Date:", GitDate)
+		}
+		if GitCommit != "" {
 			fmt.Println("     Commit:", GitCommit)
-			fmt.Println("      State:", GitState)
+		}
+		fmt.Println("      State:", GitState)
+		if GitSummary != "not set" {
 			fmt.Println("    Summary:", GitSummary)
 		}
 		if BuildDate != "not set" {
