@@ -138,6 +138,7 @@ func initConfig() {
 		confPath, err = os.UserConfigDir()
 		cobra.CheckErr(err)
 		confPath = filepath.Join(confPath, "installgo")
+		cobra.CheckErr(os.MkdirAll(confPath, 0750)) // ensure confPath exists
 		checkForConfigIni(confPath)
 		igoViper.AddConfigPath(confPath)
 		igoViper.SetConfigName("config")
@@ -152,9 +153,10 @@ func initConfig() {
 	}
 	igoViper.SetEnvPrefix("igo")
 	igoViper.SetEnvKeyReplacer(strings.NewReplacer("DEFAULT.", ""))
-	igoViper.AutomaticEnv()                     // read in environment variables that match
-	cobra.CheckErr(os.MkdirAll(confPath, 0750)) // ensure confPath exists
-	// If a config file is found, read it in.
+	igoViper.AutomaticEnv() // read in environment variables that match
+	// Read the config file if it exists.  If it does not exist, create it.
+	// If the config file is given with the --config option, it must exist.
+	// If it does not exist, exit with an error.
 	if err := igoViper.ReadInConfig(); err != nil {
 		// there was an error reading the config file.  If it did not exist,
 		// the create it from the embedded default config file.
