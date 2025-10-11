@@ -14,5 +14,11 @@
         "installgo",
         "maxcachetime",
         "parms"
-    ]
+    ],
+    "cSpell.enabledFileTypes": {
+        "plaintext": true,
+        "jsonc": true,
+        "json": true,
+        "go": true
+    }
 }
