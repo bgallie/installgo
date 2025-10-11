@@ -179,7 +179,6 @@ func updateGo() {
 			if len(cmdAndArgsToRun) < 1 {
 				continue // nothing to run, so skip it
 			}
-			fmt.Println("Done.")
 			cmd := exec.Command(cmdAndArgsToRun[0], cmdAndArgsToRun[1:]...)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
@@ -190,6 +189,8 @@ func updateGo() {
 					break
 				}
 				log.Fatal(cmdErr)
+			} else {
+				fmt.Println("Done.")
 			}
 		}
 	}
