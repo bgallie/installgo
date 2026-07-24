@@ -1,22 +1,22 @@
 autoupdate = false
 maxcachetime = '2.0'
 reinstall = false
-separator = '^&^'
+separator = '\x00'
 
 [darwin-amd64]
-command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+command = ['sudo\x00installer\x00-pkg\x00{{.DlFileName}}\x00-target\x00{{.InstallDir}}']
 comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'pkg'
 installdir = '/'
 
 [darwin-arm64]
-command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+command = ['sudo\x00installer\x00-pkg\x00{{.DlFileName}}\x00-target\x00{{.InstallDir}}']
 comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'pkg'
 installdir = '/'
 
 [darwin-armv6l]
-command = ['sudo^&^installer^&^-pkg^&^{{.DlFileName}}^&^-target^&^{{.InstallDir}}']
+command = ['sudo\x00installer\x00-pkg\x00{{.DlFileName}}\x00-target\x00{{.InstallDir}}']
 comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'pkg'
 installdir = '/'
@@ -26,41 +26,41 @@ installdir = ''
 
 [editor]
 [editor.linux-amd64]
-command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'
+command = 'gnome-terminal\x00--show-menubar\x00--maximize\x00--\x00{{.Editor}}\x00{{.ConfigFile}}'
 editor = 'nano'
 
 [editor.linux-arm64]
-command = 'gnome-terminal^&^--show-menubar^&^--maximize^&^--^&^{{.Editor}}^&^{{.ConfigFile}}'
+command = 'gnome-terminal\x00--show-menubar\x00--maximize\x00--\x00{{.Editor}}\x00{{.ConfigFile}}'
 editor = 'nano'
 
 [editor.windows-386]
-command = '{{.Editor}}^&^{{.ConfigFile}}'
+command = '{{.Editor}}\x00{{.ConfigFile}}'
 editor = 'notepad.exe'
 
 [editor.windows-amd64]
-command = '{{.Editor}}^&^{{.ConfigFile}}'
+command = '{{.Editor}}\x00{{.ConfigFile}}'
 editor = 'notepad.exe'
 
 [linux-amd64]
-command = ['sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xf^&^{{.TempDir}}/{{.DlFileName}}']
+command = ['sudo\x00rm\x00-rf\x00{{.InstallDir}}/go', 'sudo\x00tar\x00-C\x00{{.InstallDir}}\x00-xf\x00{{.TempDir}}/{{.DlFileName}}']
 comment = ['Removing Go version {{printf "%s ... " .CurVersion}}', 'Installing Go version {{printf "%s ... " .NewVersion}}']
 extension = 'tar.gz'
 installdir = '/usr/local'
 
 [linux-arm64]
-command = ['sudo^&^rm^&^-rf^&^{{.InstallDir}}/go', 'sudo^&^tar^&^-C^&^{{.InstallDir}}^&^-xvf^&^{{.TempDir}}/{{.DlFileName}}']
+command = ['sudo\x00rm\x00-rf\x00{{.InstallDir}}/go', 'sudo\x00tar\x00-C\x00{{.InstallDir}}\x00-xvf\x00{{.TempDir}}/{{.DlFileName}}']
 comment = ['Removing Go version {{printf "%s\n" .CurVersion}}', 'Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'tar.gz'
 installdir = '/usr/local'
 
 [windows-386]
-command = ['msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}']
+command = ['msiexec\x00/i\x00{{.TempDir}}\{{.DlFileName}}']
 comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'msi'
 installdir = 'C:\Program Files (x86)\Go'
 
 [windows-amd64]
-command = ['msiexec^&^/i^&^{{.TempDir}}\{{.DlFileName}}']
+command = ['msiexec\x00/i\x00{{.TempDir}}\{{.DlFileName}}']
 comment = ['Installing Go version {{printf "%s\n" .NewVersion}}']
 extension = 'msi'
 installdir = 'C:\Program Files\Go'
